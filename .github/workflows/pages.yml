@@ -26,26 +26,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Browser tests with isolated local fixtures
         run: npm run test:e2e
-      - name: Check optional CloudBase configuration
-        env:
-          VITE_CLOUDBASE_ENV_ID: ${{ vars.VITE_CLOUDBASE_ENV_ID }}
-          VITE_CLOUDBASE_PUBLISHABLE_KEY: ${{ vars.VITE_CLOUDBASE_PUBLISHABLE_KEY }}
-          VITE_CLOUDBASE_AUTH_URL: ${{ vars.VITE_CLOUDBASE_AUTH_URL }}
-        run: |
-          if [ -n "$VITE_CLOUDBASE_ENV_ID$VITE_CLOUDBASE_PUBLISHABLE_KEY$VITE_CLOUDBASE_AUTH_URL" ]; then
-            npm run check:deploy
-          else
-            echo '::notice::CloudBase is not connected yet. Publishing the waiting-for-setup page; account testing is unavailable.'
-          fi
-      - name: Build for repository subpath
-        run: npm run build
-        env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
-          VITE_CLOUDBASE_ENV_ID: ${{ vars.VITE_CLOUDBASE_ENV_ID }}
-          VITE_CLOUDBASE_REGION: ${{ vars.VITE_CLOUDBASE_REGION }}
-          VITE_CLOUDBASE_PUBLISHABLE_KEY: ${{ vars.VITE_CLOUDBASE_PUBLISHABLE_KEY }}
-          VITE_CLOUDBASE_AUTH_URL: ${{ vars.VITE_CLOUDBASE_AUTH_URL }}
-          VITE_CLOUDBASE_FUNCTION_NAME: points-ledger
+      - name: Build test-site entry page
+        run: node scripts/pages-entry.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -64,3 +46,4 @@ jobs:
       - name: Deploy test frontend
         id: deployment
         uses: actions/deploy-pages@v4
+

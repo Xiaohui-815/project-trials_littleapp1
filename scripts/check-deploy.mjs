@@ -12,7 +12,8 @@ const url = new URL(env.VITE_CLOUDBASE_AUTH_URL);
 if (url.protocol !== 'https:' || url.pathname !== '/__auth/' || url.username || url.password || url.hash) {
   throw new Error('VITE_CLOUDBASE_AUTH_URL 必须是 CloudBase 的 HTTPS /__auth/ 登录地址。');
 }
-if (!/^\/[\w/-]*\/$/.test(env.VITE_BASE_PATH || '/') && env.VITE_BASE_PATH !== '/') {
+const basePath = env.VITE_BASE_PATH || '/';
+if (basePath !== '/' && !/^\/[\w/-]*\/$/.test(basePath)) {
   throw new Error('VITE_BASE_PATH 必须以 / 开头和结尾，例如 /project-trials_littleapp1/。');
 }
 console.log('公开配置完整。此检查不代替真实登录、权限及数据库联调。');

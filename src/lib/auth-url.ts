@@ -1,5 +1,4 @@
-// The SDK's toDefaultLoginPage assumes /__auth is on the application's origin.
-// GitHub Pages cannot serve that route; use the configured CloudBase hosted origin.
+// CloudBase's hosted login requires a same-origin callback and session storage.
 export function hostedAuthUrl(authUrl: string, envId: string, returnUrl: string) {
   const url = new URL(authUrl);
   if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/__auth/') {
@@ -7,6 +6,7 @@ export function hostedAuthUrl(authUrl: string, envId: string, returnUrl: string)
   }
   if (url.hash) throw new Error('托管登录地址不能包含片段参数。');
   const target = new URL(returnUrl);
+  if (target.origin !== url.origin) throw new Error('账本与托管登录页必须部署在同一域名。');
   if (target.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(target.hostname)) {
     throw new Error('登录回调必须使用 HTTPS。');
   }

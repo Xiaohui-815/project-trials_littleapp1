@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hostedAuthUrl } from '../src/lib/auth-url.ts';
 
-test('hosted sign-in uses CloudBase origin and preserves the GitHub repository callback', () => {
-  const callback = 'https://example.github.io/project-trials_littleapp1/';
+test('hosted sign-in preserves the same-origin callback', () => {
+  const callback = 'https://login.example.com/';
   const url = new URL(hostedAuthUrl('https://login.example.com/__auth/?client_id=web-client&app_id=test-app', 'test-env', callback));
   assert.equal(url.origin, 'https://login.example.com');
   assert.equal(url.pathname, '/__auth/');
@@ -19,4 +19,5 @@ test('hosted auth rejects insecure, credential-bearing or invalid sign-in destin
     assert.throws(() => hostedAuthUrl(url, 'test-env', callback));
   }
   assert.throws(() => hostedAuthUrl('https://login.example.com/__auth/', 'test-env', 'http://public.example.com/'));
+  assert.throws(() => hostedAuthUrl('https://login.example.com/__auth/', 'test-env', 'https://example.github.io/app/'));
 });
