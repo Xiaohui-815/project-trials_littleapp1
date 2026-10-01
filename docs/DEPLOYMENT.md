@@ -35,3 +35,13 @@
 默认域名用于开发测试，有平台访问提示及频率限制；未购买正式域名。
 
 参考：https://docs.cloudbase.net/hosting/manage
+
+## 托管注册页配置
+
+cloudbase/hosted-auth/login.config.json 为本项目的托管登录页公开配置。必须同时启用 userRegistry.enable、设置 registerType 为 split，并在 userRegistry.web 中包含 email，才会显示独立的“立即注册”入口。web 同时列出密码和邮箱验证登录。
+
+部署命令：
+
+    tcb hosting deploy cloudbase/hosted-auth/login.config.json /__auth/env/login.config.json -e codex-project-trials-d7a0d8825a1 -r ap-shanghai
+
+此命令只更新登录页 JSON，不覆盖平台登录页 HTML 或脚本。CloudBase 控制台后续保存托管登录页设置可能覆盖此配置，修改后应读回核验。
