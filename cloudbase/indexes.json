@@ -1,0 +1,10 @@
+{
+  "collection": "point_records",
+  "indexes": [
+    {
+      "name": "owner_date_id",
+      "unique": false,
+      "keys": { "ownerId": 1, "incomeDate": -1, "_id": -1 }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "envId": "YOUR_TEST_ENVIRONMENT_ID",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "points-ledger",
+      "runtime": "Nodejs20.19",
+      "handler": "index.main",
+      "timeout": 20,
+      "memorySize": 256,
+      "installDependency": true,
+      "ignore": ["node_modules", ".git", ".env", "*.log"]
+    }
+  ]
+}

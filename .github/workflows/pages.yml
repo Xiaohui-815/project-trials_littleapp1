@@ -1,0 +1,66 @@
+name: Verify and publish test frontend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests with isolated local fixtures
+        run: npm run test:e2e
+      - name: Check optional CloudBase configuration
+        env:
+          VITE_CLOUDBASE_ENV_ID: ${{ vars.VITE_CLOUDBASE_ENV_ID }}
+          VITE_CLOUDBASE_PUBLISHABLE_KEY: ${{ vars.VITE_CLOUDBASE_PUBLISHABLE_KEY }}
+          VITE_CLOUDBASE_AUTH_URL: ${{ vars.VITE_CLOUDBASE_AUTH_URL }}
+        run: |
+          if [ -n "$VITE_CLOUDBASE_ENV_ID$VITE_CLOUDBASE_PUBLISHABLE_KEY$VITE_CLOUDBASE_AUTH_URL" ]; then
+            npm run check:deploy
+          else
+            echo '::notice::CloudBase is not connected yet. Publishing the waiting-for-setup page; account testing is unavailable.'
+          fi
+      - name: Build for repository subpath
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_CLOUDBASE_ENV_ID: ${{ vars.VITE_CLOUDBASE_ENV_ID }}
+          VITE_CLOUDBASE_REGION: ${{ vars.VITE_CLOUDBASE_REGION }}
+          VITE_CLOUDBASE_PUBLISHABLE_KEY: ${{ vars.VITE_CLOUDBASE_PUBLISHABLE_KEY }}
+          VITE_CLOUDBASE_AUTH_URL: ${{ vars.VITE_CLOUDBASE_AUTH_URL }}
+          VITE_CLOUDBASE_FUNCTION_NAME: points-ledger
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy test frontend
+        id: deployment
+        uses: actions/deploy-pages@v4
